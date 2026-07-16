@@ -1,116 +1,63 @@
 ---
 name: xianyu-seller-toolkit
-description: 闲鱼虚拟产品卖家一站式内容工具链。当你需要把虚拟资料上架到闲鱼时使用。直接说"调用 xianyu-seller-toolkit 处理这个资料"即可触发完整管线：内容润色→展示图生成→HTML交付件→商品文案。
+description: 闲鱼虚拟产品卖家一站式内容工具链。触发词包括"调用 xianyu-seller-toolkit""卖家工具链""上架闲鱼""虚拟资料处理"。具身智能：根据用户具体需求自动判断执行完整管线还是只调用其中某个工具。
 ---
 
 # 闲鱼卖家工具链 (Xianyu Seller Toolkit)
 
-**调用方式**：在对话中说以下任意一句即可触发：
+> 所有工具只做**内容层**，不碰平台操作。
 
-- "调用 xianyu-seller-toolkit 把这个虚拟资料处理一下，我要上架到平台当虚拟资料卖"
-- "调用卖家工具链处理这个文件"
-- "帮我把这份资料准备上架闲鱼"
-- "/xianyu-seller-toolkit"
+## ⚡ 核心原则：按需调用
 
-工具链只做**内容层**（润色/出图/文案/HTML），不碰平台操作。
+**被触发时，必须先判断用户意图，只执行需要的步骤，不要总是跑全流程。**
 
-## 工具总览
+## 🧠 智能路由表
 
-```
-┌─────────────────────────────────────────────────────┐
-│                闲鱼卖家工具链 v1.0                      │
-├──────────────┬──────────────────────────────────────┤
-│ 阶段          │ 工具                                  │
-├──────────────┼──────────────────────────────────────┤
-│ 1. 内容润色    │ baoyu-format-markdown               │
-│ 2. 展示图生成  │ baoyu-image-cards + baoyu-imagine    │
-│ 3. 社交卡片    │ guizang-social-card-skill            │
-│ 4. HTML 交付   │ baoyu-markdown-to-html               │
-│ 5. AI 文案     │ FishClaw prompt_tools                │
-│ 6. AI 生图     │ FishClaw generate_image_tools        │
-│ 7. 竞品调研    │ ai-goofish (闲鱼智能监控)             │
-│ 8. 定价参考    │ 内置分析                              │
-└──────────────┴──────────────────────────────────────┘
-```
+根据用户的话，匹配对应工具：
 
-## 标准工作流
+| 用户说了什么 | 调用哪个工具 | 
+|-------------|-------------|
+| "处理这个资料""准备上架""完整走一遍" | → 完整管线（流程A） |
+| "润色一下""排版优化""格式化" | → 只用 `baoyu-format-markdown` |
+| "生成展示图""做几张卡片""商品图" | → 只用 `baoyu-image-cards` + `baoyu-imagine` |
+| "生成封面图""做张图" | → 只用 `baoyu-imagine` 或 `FishClaw generate_image_tools` |
+| "转成HTML""HTML交付版""浏览器打开" | → 只用 `baoyu-markdown-to-html` |
+| "写文案""宝贝描述""闲鱼标题" | → 只用 `FishClaw prompt_tools` |
+| "竞品调研""看看闲鱼上怎么卖的""定价参考" | → 只用 `ai-goofish` |
+| "社交卡片""小红书图文" | → 只用 `guizang-social-card-skill` |
 
-对一个虚拟资料执行完整上架准备：
+## 工具清单
 
-### 流程 A：新资料上架（完整管线）
+| # | 工具 | 做什么 | 输入 | 输出 |
+|---|------|--------|------|------|
+| 1 | `baoyu-format-markdown` | 润色排版 + 优化标题 | .md 文件 | 润色版 .md |
+| 2 | `baoyu-image-cards` + `baoyu-imagine` | 内容→5张商品展示图 | .md 文件内容 | 5张 PNG (1080×1440) |
+| 3 | `guizang-social-card-skill` | Markdown→社交卡片 | .md 文件 | PNG 卡片 |
+| 4 | `baoyu-markdown-to-html` | .md→精美HTML | .md 文件 | .html (浏览器打开) |
+| 5 | `FishClaw prompt_tools` | AI写闲鱼文案 | 商品主题 | 标题+描述+卖点+话术 |
+| 6 | `FishClaw generate_image_tools` | AI生成封面图 | 主题描述 | PNG 图片 |
+| 7 | `ai-goofish` | 闲鱼关键词监控+竞品分析 | 关键词 | 竞品数据 |
 
-```
-原始 .md 文件
-  │
-  ├─[1] baoyu-format-markdown → 润色版 .md
-  │    优化排版、标题、添加商品信息区
-  │
-  ├─[2] baoyu-image-cards → 5张展示图 PNG (1080×1440)
-  │    ai分析内容 → 确认风格 → 生成提示词 → 出图
-  │
-  ├─[3] 去掉商品信息区 → 交付版 .md
-  │
-  ├─[4] baoyu-markdown-to-html → 交付版 .html
-  │    modern主题 + blue配色 → 浏览器直接打开
-  │
-  ├─[5] FishClaw prompt_tools → 闲鱼宝贝描述文案
-  │    标题 + 描述 + 卖点 + 自动回复话术
-  │
-  └─[6] 输出清单：
-         📄 润色版.md（自己留底）
-         📄 交付版.html（发给顾客）⭐
-         🖼️ 5张展示图 PNG（上架用）
-         📝 闲鱼描述文案.md
-```
+## 流程 A：完整管线
 
-### 流程 B：竞品调研
+仅当用户明确要求**完整处理**或**准备上架**时执行：
 
 ```
-ai-goofish
-  │
-  ├─ 配置监控关键词（如"GitHub开源项目"）
-  ├─ AI 分析竞品标题/价格/销量
-  ├─ 参考定价
-  └─ 优化自己的标题和描述
+原始 .md
+  → [1] baoyu-format-markdown → 润色版 .md
+  → [2] baoyu-image-cards → 5张展示图 (会先确认风格)
+  → [3] 去商品信息区 → 交付版 .md
+  → [4] baoyu-markdown-to-html → 交付版 .html (modern+blue)
+  → [5] FishClaw prompt_tools → 闲鱼描述文案
 ```
 
-## 环境依赖
+## 环境
 
-| 工具 | 依赖 | 状态 |
-|------|------|------|
-| baoyu-format-markdown | Bun + npm 包 | ✅ |
-| baoyu-image-cards | EXTEND.md 已配置 | ✅ DashScope |
-| baoyu-imagine | EXTEND.md 已配置 | ✅ qwen-image-2.0-pro |
-| baoyu-markdown-to-html | Bun + npm 包 | ✅ |
-| guizang-social-card-skill | 已克隆到本地 | ✅ |
-| FishClaw prompt_tools | Python + DashScope API Key | ✅ |
-| ai-goofish | Python + Playwright + AI API | ⚠️ 需配置 |
-
-## 调用方式
-
-在对话中说以下任意一句即可触发：
-
-- "用卖家工具链处理这个文件"
-- "把这个资料准备上架闲鱼"
-- "帮我生成这个虚拟产品的展示图"
-- "调研一下这个品类在闲鱼上的情况"
-- "生成这个资料的 HTML 交付版"
-
-## 项目目录结构
-
-```
-GitHub合集/
-├── .claude/skills/xianyu-seller-toolkit/SKILL.md  ← 本文件
-├── .baoyu-skills/                                   ← 图片/排版技能配置
-├── guizang-social-card-skill/                       ← 社交卡片技能
-├── FishClaw_MCP/                                    ← 闲鱼工具集
-├── ai-goofish/                                      ← 竞品监控
-└── image-cards/                                     ← 生成的图片输出
-```
-
-## 注意事项
-
-- 所有工具只做**内容生产**，不做平台自动操作
-- 闲鱼网页版发布功能受限，建议用 App 手动发布
-- DashScope API Key 需要在环境变量中配置
-- ai-goofish 为只读监控，风险低但需遵守平台规则
+| 工具 | 状态 |
+|------|------|
+| baoyu-format-markdown | ✅ |
+| baoyu-image-cards + baoyu-imagine | ✅ DashScope qwen-image-2.0-pro |
+| baoyu-markdown-to-html | ✅ |
+| guizang-social-card-skill | ✅ |
+| FishClaw prompt_tools | ✅ |
+| ai-goofish | ⚠️ 需配置 |
