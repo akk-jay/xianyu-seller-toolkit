@@ -1,0 +1,66 @@
+# === 敏感信息 ===
+.env
+*.env
+xianyu_cookies.json
+*.cookies.json
+**/cookies/
+
+# === API Keys & 配置 ===
+.baoyu-skills/
+!*.example
+
+# === 生成产物（不纳入版本管理）===
+image-cards/
+local-tests/
+output/
+*.png
+*.jpg
+*.jpeg
+*.webp
+
+# === 缓存 & 临时文件 ===
+.cache/
+__pycache__/
+*.pyc
+*.pyo
+logs/
+*.log
+node_modules/
+.bun/
+
+# === Playwright ===
+**/ms-playwright/
+
+# === IDE ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# === OS ===
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# === 备份文件 ===
+*-backup-*
+*.bak*
+
+# === MCP 运行时 ===
+*.lock
+
+# === 虚拟产品文件（不放工具链仓库）===
+# 根目录的产品 .md / .html 不要提交
+/*-润色版.md
+/*-交付版.md
+/*-交付版.html
+/*-analysis.md
+/*-formatted.md
+/闲鱼宝贝描述-*.md
+# 原始资料自己留着，不要传
+/GitHub*.md
+
+# === 例外：保留示例文件 ===
+!.env.example
+!assets/*.png

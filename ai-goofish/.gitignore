@@ -1,0 +1,9 @@
+.idea
+*.iml
+xianyu_state.json
+.env
+.aider*
+images/
+logs/
+*.jsonl
+__pycache__/
